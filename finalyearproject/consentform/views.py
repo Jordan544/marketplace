@@ -174,7 +174,7 @@ def listing_delete(request, pk):
   context = {
     'listing': listing
   }
-  return render(request, 'consentform/listing_delete.html', context)
+  return render(request, 'consentform/listing_confirm_delete.html', context)
 
 @login_required
 def toggle_inquiry_read(request, pk):
