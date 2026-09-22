@@ -1,0 +1,196 @@
+{% extends 'consentform/base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - Campus Marketplace{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="p-4 bg-dark text-white rounded-4 shadow-sm d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="fa-solid fa-screwdriver-wrench text-warning me-2"></i> Admin Control Center</h2>
+                <p class="text-light opacity-75 small mb-0">Manage platform categories, view registered users, and moderate listings.</p>
+            </div>
+            <div>
+                <span class="badge bg-warning text-dark px-3 py-2 fw-bold fs-6">Staff Mode</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards Row -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm p-3 bg-primary text-white rounded-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase small opacity-75 mb-1">Total Users</h6>
+                    <h3 class="fw-bold mb-0">{{ total_users_count }}</h3>
+                </div>
+                <i class="fa-solid fa-users fs-1 opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm p-3 bg-success text-white rounded-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase small opacity-75 mb-1">Active Listings</h6>
+                    <h3 class="fw-bold mb-0">{{ total_listings_count }}</h3>
+                </div>
+                <i class="fa-solid fa-shop fs-1 opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm p-3 bg-info text-white rounded-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase small opacity-75 mb-1">Categories</h6>
+                    <h3 class="fw-bold mb-0">{{ total_categories_count }}</h3>
+                </div>
+                <i class="fa-solid fa-tags fs-1 opacity-50"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Categories Section & Form -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm p-4 h-100">
+            <h4 class="h5 mb-3"><i class="fa-solid fa-folder-plus text-primary"></i> Add Category</h4>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Category Name</label>
+                    {{ form.name }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Slug</label>
+                    {{ form.slug }}
+                </div>
+                <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                    <i class="fa-solid fa-plus me-1"></i> Save Category
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-8 mb-3">
+        <div class="card border-0 shadow-sm p-4 h-100">
+            <h4 class="h5 mb-3"><i class="fa-solid fa-tags text-primary"></i> Marketplace Categories</h4>
+            <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th>Name</th>
+                            <th>Slug</th>
+                            <th>Listings Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cat in categories %}
+                            <tr>
+                                <td class="fw-semibold">{{ cat.name }}</td>
+                                <td><code>{{ cat.slug }}</code></td>
+                                <td><span class="badge bg-secondary">{{ cat.listings.count }}</span></td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="3" class="text-center text-muted">No categories available.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Management Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm p-4">
+            <h4 class="h5 mb-3"><i class="fa-solid fa-user-gear text-primary"></i> User Account Management</h4>
+            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role / Status</th>
+                            <th>Joined Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                            <tr>
+                                <td class="fw-semibold">{{ u.username }}</td>
+                                <td>{{ u.email|default:"No email provided" }}</td>
+                                <td>
+                                    {% if u.is_staff %}
+                                        <span class="badge bg-dark">Staff Admin</span>
+                                    {% elif u.profile.is_seller %}
+                                        <span class="badge bg-success">Seller</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Buyer</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ u.date_joined|date:"M d, Y" }}</td>
+                                <td>
+                                    {% if u != request.user %}
+                                        <a href="{% url 'admin_delete_user' u.id %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this user completely?');">
+                                            <i class="fa-solid fa-trash"></i> Delete
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted small">You (Admin)</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Listing Moderation Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm p-4">
+            <h4 class="h5 mb-3"><i class="fa-solid fa-rectangle-list text-primary"></i> Listing Moderation</h4>
+            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th>Title</th>
+                            <th>Owner</th>
+                            <th>Price</th>
+                            <th>Category</th>
+                            <th>Posted</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for listing in listings %}
+                            <tr>
+                                <td class="fw-semibold"><a href="{% url 'listing_detail' listing.id %}" target="_blank" class="text-decoration-none">{{ listing.title }}</a></td>
+                                <td>{{ listing.owner.username }}</td>
+                                <td>${{ listing.price }}</td>
+                                <td>{{ listing.category.name|default:"Uncategorized" }}</td>
+                                <td>{{ listing.created_at|date:"M d, Y" }}</td>
+                                <td>
+                                    <a href="{% url 'admin_delete_listing' listing.id %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Remove this listing from the marketplace?');">
+                                        <i class="fa-solid fa-trash"></i> Remove
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

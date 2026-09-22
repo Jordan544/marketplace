@@ -4,9 +4,13 @@ from django.contrib import messages
 from django.forms import inlineformset_factory
 from django.db.models import Q
 from django.core.paginator import Paginator
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django_ratelimit.decorators import ratelimit
 from django_ratelimit.exceptions import Ratelimited
+from django.contrib.auth.models import User
+from django.contrib.admin.views.decorators import staff_member_required
+from .models import Category, Listing, Inquiry
+from .forms import CategoryForm
 
 from .models import Listing, ListingImage, Category, Inquiry, Profile, Wishlist, Notification
 from .forms import ListingForm, ListingImageForm, InquiryForm, SignUpForm, UserUpdateForm, ProfileUpdateForm
@@ -310,3 +314,71 @@ def mark_all_notifications_read(request):
     request.user.notifications.filter(is_read=False).update(is_read=True)
     messages.success(request, "All notifications marked as read.")
     return redirect('notification_list')
+
+def admin_login_view(request):
+    if request.user.is_authenticated and request.user.is_staff:
+        return redirect('manage_categories') # Or your main admin dashboard route
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None and user.is_staff:
+            login(request, user)
+            messages.success(request, f"Welcome back, Administrator {user.username}!")
+            return redirect('manage_categories')
+        else:
+            messages.error(request, "Invalid credentials or you do not have administrator privileges.")
+            
+    return render(request, 'consentform/admin_login.html')
+
+
+@staff_member_required
+def manage_categories(request):
+    categories = Category.objects.all()
+    users = User.objects.all().select_related('profile')
+    listings = Listing.objects.all()
+    
+
+    total_users_count = users.count()
+    total_listings_count = listings.count()
+    total_categories_count = categories.count()
+
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Category added successfully!")
+            return redirect('manage_categories')
+    else:
+        form = CategoryForm()
+
+    context = {
+        'categories': categories,
+        'users': users,
+        'listings': listings,
+        'form': form,
+        'total_users_count': total_users_count,
+        'total_listings_count': total_listings_count,
+        'total_categories_count': total_categories_count,
+    }
+    return render(request, 'consentform/manage_categories.html', context)
+
+@staff_member_required
+def admin_delete_user(request, user_id):
+    user_to_delete = get_object_or_404(User, pk=user_id)
+    if user_to_delete == request.user:
+        messages.error(request, "You cannot delete your own active admin account.")
+    else:
+        user_to_delete.delete()
+        messages.success(request, "User deleted successfully.")
+    return redirect('manage_categories')
+
+@staff_member_required
+def admin_delete_listing(request, listing_id):
+    listing_to_delete = get_object_or_404(Listing, pk=listing_id)
+    listing_to_delete.delete()
+    messages.success(request, "Listing deleted successfully by administrator.")
+    return redirect('manage_categories')
