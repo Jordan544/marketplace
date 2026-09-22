@@ -32,6 +32,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'consentform'
+    'cloudinary_storage',
+    'cloudinary',
 ]
 
 MIDDLEWARE = [
@@ -105,3 +107,11 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 LOGIN_REDIRECT_URL = 'listing_list'
 LOGOUT_REDIRECT_URL = 'listing_list'
 LOGIN_URL = 'login'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'emcocfua',
+    'API_KEY': '186949128887736',
+    'API_SECRET': 'VXz092GrNuc6q8EGvHIlnABf2sA',
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
