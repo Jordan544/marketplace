@@ -1,5 +1,5 @@
 from django import forms
-from .models import Listing, ListingImage, Inquiry, Profile
+from .models import Listing, ListingImage, Inquiry, Profile, Category, Notification, Wishlist
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import Profile
@@ -43,3 +43,13 @@ class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['avatar', 'bio', 'phone_number', 'location']
+  
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ['name', 'slug']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Electronics, Books'}),
+            'slug': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. electronics, books (optional)'}),
+        }
