@@ -1,0 +1,87 @@
+:root {
+    --primary-color: #0d6efd;
+    --primary-hover: #0b5ed7;
+    --transition-speed: 0.25s ease-in-out;
+}
+
+body {
+    background-color: #f4f6f9 !important;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #333333;
+}
+
+/* Navbar Enhancements */
+.navbar {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.navbar-brand {
+    letter-spacing: -0.5px;
+}
+
+/* Card Hover Animations & Shadows */
+.card {
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    border-radius: 0.75rem;
+}
+
+.card.shadow-sm:hover, .list-group-item-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Custom Badges & Buttons */
+.badge {
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.btn {
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all var(--transition-speed);
+}
+
+/* Form Styling & Focus States */
+.form-control, .form-select {
+    border-radius: 0.5rem;
+    padding: 0.65rem 1rem;
+    border-color: #dee2e6;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+/* Image Object-Fit Helpers */
+.object-fit-cover {
+    object-fit: cover;
+}
+
+.object-fit-contain {
+    object-fit: contain;
+    background-color: #000;
+}
+
+/* Custom Alert Animations */
+.alert {
+    border-radius: 0.75rem;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Dashboard Customization */
+.nav-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+    border-bottom: 3px solid transparent;
+    padding: 0.75rem 1.25rem;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    background: transparent;
+    border-bottom-color: var(--primary-color);
+}

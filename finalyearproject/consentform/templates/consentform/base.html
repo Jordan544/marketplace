@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Campus Marketplace{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'style/style.css' %}">
+
+    <style>
+        .custom-navbar {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        }
+        .custom-navbar .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            transition: all 0.2s ease-in-out;
+            border-radius: 0.375rem;
+            font-weight: 500;
+        }
+        .custom-navbar .nav-link:hover {
+            color: #ffffff !important;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+        .custom-navbar .nav-link.active {
+            color: #ffffff !important;
+            background-color: rgba(255, 255, 255, 0.18) !important;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        .custom-navbar .nav-link i {
+            color: rgba(255, 255, 255, 0.75);
+            transition: all 0.2s ease-in-out;
+            margin-right: 0.35rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm mb-4 py-3 custom-navbar">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-5 text-white d-flex align-items-center gap-2" href="{% url 'listing_list' %}">
+                <i class="fa-solid fa-shop text-warning fs-4"></i> Campus Marketplace
+            </a>
+            
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item me-lg-2">
+                            <span class="nav-link px-3 py-1.5 rounded-pill bg-white bg-opacity-10 text-white fw-semibold border border-light border-opacity-25 small shadow-sm d-flex align-items-center" style="cursor: default;">
+                                <i class="fa-solid fa-user-shield text-warning me-1"></i> Hello, {{ user.username|title }}
+                            </span>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link px-2 py-2 {% if request.resolver_match.url_name == 'listing_list' %}active{% endif %}" href="{% url 'listing_list' %}">
+                                <i class="fa-solid fa-store"></i> Browse
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link px-2 py-2 {% if request.resolver_match.url_name == 'listing_create' %}active{% endif %}" href="{% url 'listing_create' %}">
+                                <i class="fa-solid fa-square-plus"></i> Create Listing
+                            </a>
+                        </li>
+
+                        <!-- Notifications Bell Link -->
+                        <li class="nav-item">
+                            <a class="nav-link px-2 py-2 position-relative {% if request.resolver_match.url_name == 'notification_list' %}active{% endif %}" href="{% url 'notification_list' %}">
+                                <i class="fa-solid fa-bell"></i> Alerts
+                                {% with unread_notifs_count=user.notifications.all.filter.count %}
+                                    <!-- Dynamic Badge Counter handled via filter if needed or simple iteration check -->
+                                    <span class="badge rounded-pill bg-danger ms-1" style="font-size: 0.65rem;">
+                                        {{ user.notifications.all.count }}
+                                    </span>
+                                {% endwith %}
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link px-2 py-2 {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+                                <i class="fa-solid fa-house-user"></i> Dashboard
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link px-2 py-2 {% if request.resolver_match.url_name == 'profile_edit' %}active{% endif %}" href="{% url 'profile_edit' %}">
+                                <i class="fa-solid fa-circle-user"></i> Profile
+                            </a>
+                        </li>
+
+                        <li class="nav-item ms-lg-2">
+                            <form action="{% url 'logout' %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-light btn-sm px-3 py-2 fw-semibold w-100">
+                                   <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link px-3 py-2" href="{% url 'login' %}">
+                                <i class="fa-solid fa-right-to-bracket"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item ms-lg-2">
+                            <a class="btn btn-light text-primary btn-sm px-3 py-2 fw-bold shadow-sm" href="{% url 'signup' %}">
+                                <i class="fa-solid fa-user-plus me-1 text-primary"></i> Sign up
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/marketplace.js' %}"></script>
+</body>
+</html>
